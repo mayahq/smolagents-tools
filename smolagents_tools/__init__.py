@@ -35,6 +35,11 @@ except ImportError:
     ChatCompletionTool = SimplePromptTool = None
 
 try:
+    from .vnc import VNCComputerUseTool, SimpleVNCComputerUseTool
+except ImportError:
+    VNCComputerUseTool = SimpleVNCComputerUseTool = None
+
+try:
     from .macos import MacOSUseTool, SimpleMacOSTool
 except ImportError:
     MacOSUseTool = SimpleMacOSTool = None
@@ -75,6 +80,10 @@ _ALL_TOOLS = {
     # AI and planning (optional)
     "chat_completion": ChatCompletionTool,
     "simple_prompt": SimplePromptTool,
+    
+    # VNC automation (optional)
+    "vnc_computer": VNCComputerUseTool,
+    "simple_vnc_computer": SimpleVNCComputerUseTool,
 }
 
 # Filter out None values (missing optional dependencies)
@@ -89,6 +98,7 @@ _ALL_CATEGORIES = {
     "macos": ["macos", "simple_macos"],
     "ai": ["chat_completion", "simple_prompt"],
     "planning": ["planning"],
+    "vnc": ["vnc_computer", "simple_vnc_computer"],
 }
 
 # Filter categories to only include available tools
@@ -284,6 +294,8 @@ _TOOL_EXPORTS = [
     "SimpleMacOSTool",
     "ChatCompletionTool",
     "SimplePromptTool",
+    "VNCComputerUseTool",
+    "SimpleVNCComputerUseTool",
 ]
 
 # Only export tools that are actually available

@@ -85,49 +85,59 @@ class SmolTool(Tool):
         """Create forward method with proper signature based on inputs"""
         input_names = list(self.inputs.keys())
         
-        # Create parameter list for the method signature
-        params = ['self']
-        defaults = []
-        
-        for input_name in input_names:
-            input_def = self.inputs[input_name]
+        # Create parameter list for the method signature, strictly following the order of self.inputs
+        signature_parts = []
+        for input_name, input_def in self.inputs.items():
             if input_def.get('required', False):
-                params.append(input_name)
+                signature_parts.append(input_name)
             else:
-                params.append(input_name)
-                # Add default value
                 default_val = input_def.get('default', None)
-                defaults.append(default_val)
+                signature_parts.append(f"{input_name}={repr(default_val)}")
         
-        # Create the method signature string
-        if defaults:
-            # Calculate how many params have defaults
-            num_defaults = len(defaults)
-            required_params = params[1:-num_defaults]  # Skip 'self' and params with defaults
-            default_params = params[-num_defaults:]
-            
-            sig_parts = required_params + [f"{p}=None" for p in default_params]
-        else:
-            sig_parts = params[1:]  # Skip 'self'
-        
-        signature = ', '.join(sig_parts)
+        signature = ', '.join(signature_parts)
         
         # Create kwargs assignment lines
-        kwargs_lines = []
-        for name in input_names:
-            kwargs_lines.append(f"    kwargs['{name}'] = {name}")
-        kwargs_code = '\n'.join(kwargs_lines)
+        # These lines will map the explicit parameters from the forward method to a kwargs dictionary
+        kwargs_assignment_lines = []
+        for name in self.inputs.keys():
+            kwargs_assignment_lines.append(f"    kwargs['{name}'] = {name}")
+        kwargs_code = '\n'.join(kwargs_assignment_lines)
         
         # Create the method code
         method_code = f"""def forward(self, {signature}):
-    '''Forward method with proper signature for smolagents'''
+    '''Forward method with explicit signature matching tool inputs for smolagents'''
     kwargs = {{}}
 {kwargs_code}
-    return self._execute_with_kwargs(**kwargs)
+    # Check if this is being called during initialization (no arguments)
+    # If so, return a default response
+    if not any(kwargs.values()):
+        return "Tool initialized"
+    
+    # Directly call self.execute, handling async execution
+    import asyncio
+    import concurrent.futures
+    try:
+        loop = asyncio.get_running_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(asyncio.run, self.execute(**kwargs))
+            result = future.result()
+            if isinstance(result, SmolToolResult):
+                return result.output if result.success else f"Error: {{result.error}}"
+            else:
+                return str(result)
+    except RuntimeError:
+        result = asyncio.run(self.execute(**kwargs))
+        if isinstance(result, SmolToolResult):
+            return result.output if result.success else f"Error: {{result.error}}"
+        else:
+            return str(result)
+    except Exception as e:
+        return f"Error executing tool: {{str(e)}}"
 """
         
         # Execute the method code to create the method
-        namespace = {}
+        # Include SmolToolResult in the namespace so it's available in the forward method
+        namespace = {'SmolToolResult': SmolToolResult}
         exec(method_code, namespace)
         
         # Bind the method to the instance

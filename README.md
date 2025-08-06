@@ -60,14 +60,17 @@ result = agent.run("Search for Python tutorials and create a summary")
 - **SimpleMacOSTool** - Basic macOS operations and AppleScript execution
 - **PlanningTool** - Task planning and management
 - **ChatCompletionTool** - LLM integration (OpenAI, Anthropic, local)
+- **VNCComputerUseTool** - VNC server automation and control
+- **SimpleVNCComputerUseTool** - Basic VNC operations
 
 ### Tool Collections
 - **Basic Toolset** (5 tools): Essential tools for most tasks
 - **Web Toolset** (4 tools): Web-focused operations
 - **Development Toolset** (7 tools): Software development workflow
 - **AI Toolset** (5 tools): AI and language model integration
+- **VNC Toolset** (2 tools): VNC desktop automation capabilities
 
-**Total: 19 available tools** ready for use with smolagents!
+**Total: 23 available tools** ready for use with smolagents!
 
 ## 📚 Examples
 
@@ -135,6 +138,50 @@ async def macos_example():
     )
 
 asyncio.run(macos_example())
+```
+
+### VNC Automation
+```python
+# VNC automation example
+from smolagents_tools import create_tool
+import asyncio
+
+async def vnc_example():
+    # Create VNC tool
+    vnc_tool = create_tool("vnc_computer")
+    
+    # Connect to VNC server
+    result = await vnc_tool.execute(
+        action="connect",
+        host="localhost",
+        port=5900
+    )
+    print(f"Connection result: {result}")
+    
+    # Move mouse and click
+    result = await vnc_tool.execute(
+        action="mouse_click",
+        x=100,
+        y=100,
+        button=1
+    )
+    print(f"Mouse click result: {result}")
+    
+    # Type text
+    result = await vnc_tool.execute(
+        action="type_text",
+        text="Hello VNC World!"
+    )
+    print(f"Type text result: {result}")
+    
+    # Capture screen
+    result = await vnc_tool.execute(
+        action="capture_screen",
+        filename="screenshot.png"
+    )
+    print(f"Screen capture result: {result}")
+
+asyncio.run(vnc_example())
 ```
 
 ## 🔧 Key Features
