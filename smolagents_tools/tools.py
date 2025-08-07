@@ -73,7 +73,7 @@ def bash_tool(command: str, restart: bool = False) -> str:
         return f"Error: {result.error}"
 
 @tool
-def python_executor(code: str, timeout: int = 30) -> str:
+def python_executor_tool(code: str, timeout: int = 30) -> str:
     """
     Execute Python code with timeout and safety restrictions.
     
@@ -98,7 +98,7 @@ def python_executor(code: str, timeout: int = 30) -> str:
         return f"Error: {result.error}"
 
 @tool
-def safe_python_executor(code: str, timeout: int = 30) -> str:
+def safe_python_executor_tool(code: str, timeout: int = 30) -> str:
     """
     Execute Python code with enhanced safety restrictions.
     
@@ -123,7 +123,7 @@ def safe_python_executor(code: str, timeout: int = 30) -> str:
         return f"Error: {result.error}"
 
 @tool
-def file_editor(command: str, path: str, file_text: str = None, old_str: str = None, new_str: str = None, view_range: str = None) -> str:
+def file_editor_tool(command: str, path: str, file_text: str = None, old_str: str = None, new_str: str = None, view_range: str = None) -> str:
     """
     Edit files with various operations like create, read, write, and str_replace.
     
@@ -158,7 +158,7 @@ def file_editor(command: str, path: str, file_text: str = None, old_str: str = N
         return f"Error: {result.error}"
 
 @tool
-def file_reader(path: str) -> str:
+def file_reader_tool(path: str) -> str:
     """
     Read the contents of a file.
     
@@ -182,7 +182,7 @@ def file_reader(path: str) -> str:
         return f"Error: {result.error}"
 
 @tool
-def file_writer(path: str, content: str) -> str:
+def file_writer_tool(path: str, content: str) -> str:
     """
     Write content to a file.
     
@@ -253,7 +253,7 @@ def planning_tool(action: str, task_description: str = None, plan_id: str = None
 
 if _WebSearchTool:
     @tool
-    def web_search(query: str, engine: str = "duckduckgo", max_results: int = 10, region: str = "us-en", time_range: str = None) -> str:
+    def web_search_tool(query: str, engine: str = "duckduckgo", max_results: int = 10, region: str = "us-en", time_range: str = None) -> str:
         """
         Search the web using various search engines.
         
@@ -326,7 +326,7 @@ if _BrowserTool:
 
 if _WebCrawlerTool:
     @tool
-    def web_crawler(url: str, extraction_strategy: str = "basic", css_selector: str = None,
+    def web_crawler_tool(url: str, extraction_strategy: str = "basic", css_selector: str = None,
                     word_count_threshold: int = 10, only_text: bool = True,
                     include_links: bool = False, include_images: bool = False) -> str:
         """
@@ -367,7 +367,7 @@ if _WebCrawlerTool:
 
 if _ChatCompletionTool:
     @tool
-    def chat_completion(messages: str, provider: str = "openai", model: str = "gpt-3.5-turbo",
+    def chat_completion_tool(messages: str, provider: str = "openai", model: str = "gpt-3.5-turbo",
                        temperature: float = 0.7, max_tokens: int = 1000, system_prompt: str = None,
                        api_key: str = None, region: str = "us-east-1") -> str:
         """

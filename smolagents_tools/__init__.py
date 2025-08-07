@@ -7,9 +7,52 @@ All tools follow the smolagents Tool interface and can be used in CodeAct loops.
 
 from .utils.base import AsyncSmolTool, SmolTool, SmolToolResult
 
-# Import all tools from the centralized tools module (with @tool decorators applied)
+# Import all @tool decorated functions from tools module
 from .tools import (
-    # Core tools (always available)
+    # Core @tool decorated functions (always available)
+    bash_tool,
+    python_executor_tool,
+    safe_python_executor_tool,
+    file_editor_tool,
+    file_reader_tool,
+    file_writer_tool,
+    planning_tool,
+)
+
+# Import optional @tool decorated functions (may not be available due to missing dependencies)
+try:
+    from .tools import web_search_tool
+except (ImportError, AttributeError):
+    web_search_tool = None
+
+try:
+    from .tools import browser_tool
+except (ImportError, AttributeError):
+    browser_tool = None
+
+try:
+    from .tools import web_crawler_tool
+except (ImportError, AttributeError):
+    web_crawler_tool = None
+
+try:
+    from .tools import chat_completion_tool
+except (ImportError, AttributeError):
+    chat_completion_tool = None
+
+try:
+    from .tools import vnc_tool
+except (ImportError, AttributeError):
+    vnc_tool = None
+
+try:
+    from .tools import macos_tool
+except (ImportError, AttributeError):
+    macos_tool = None
+
+# Import original tool classes for backward compatibility
+from .tools import (
+    # Core tool classes (always available)
     BashTool,
     PythonExecutorTool,
     SafePythonExecutorTool,
@@ -18,7 +61,7 @@ from .tools import (
     SimpleFileWriterTool,
     PlanningTool,
     
-    # Optional tools (may be None if dependencies not available)
+    # Optional tool classes (may be None if dependencies not available)
     WebSearchTool,
     DuckDuckGoSearchTool,
     GoogleSearchTool,
@@ -40,41 +83,41 @@ __version__ = "0.1.0"
 # Tool registry for easy access (only include available tools)
 _ALL_TOOLS = {
     # Core execution tools (always available)
-    "bash": BashTool,
-    "python_executor": PythonExecutorTool,
-    "safe_python_executor": SafePythonExecutorTool,
+    "bash_tool": BashTool,
+    "python_executor_tool": PythonExecutorTool,
+    "safe_python_executor_tool": SafePythonExecutorTool,
     
     # File operations (always available)
-    "file_editor": FileEditorTool,
-    "file_reader": SimpleFileReaderTool,
-    "file_writer": SimpleFileWriterTool,
+    "file_editor_tool": FileEditorTool,
+    "file_reader_tool": SimpleFileReaderTool,
+    "file_writer_tool": SimpleFileWriterTool,
     
     # Planning (always available)
-    "planning": PlanningTool,
+    "planning_tool": PlanningTool,
     
     # Web tools (optional)
-    "web_search": WebSearchTool,
-    "duckduckgo_search": DuckDuckGoSearchTool,
-    "google_search": GoogleSearchTool,
-    "bing_search": BingSearchTool,
-    "web_crawler": WebCrawlerTool,
-    "simple_web_scraper": SimpleWebScraperTool,
+    "web_search_tool": WebSearchTool,
+    "duckduckgo_search_tool": DuckDuckGoSearchTool,
+    "google_search_tool": GoogleSearchTool,
+    "bing_search_tool": BingSearchTool,
+    "web_crawler_tool": WebCrawlerTool,
+    "simple_web_scraper_tool": SimpleWebScraperTool,
     
     # Browser automation (optional)
-    "browser": BrowserTool,
-    "simple_browser": SimpleBrowserTool,
+    "browser_tool": BrowserTool,
+    "simple_browser_tool": SimpleBrowserTool,
     
     # macOS automation (optional)
-    "macos": MacOSUseTool,
-    "simple_macos": SimpleMacOSTool,
+    "macos_tool": MacOSUseTool,
+    "simple_macos_tool": SimpleMacOSTool,
     
     # AI and planning (optional)
-    "chat_completion": ChatCompletionTool,
-    "simple_prompt": SimplePromptTool,
+    "chat_completion_tool": ChatCompletionTool,
+    "simple_prompt_tool": SimplePromptTool,
     
     # VNC automation (optional)
-    "vnc_computer": VNCComputerUseTool,
-    "simple_vnc_computer": SimpleVNCComputerUseTool,
+    "vnc_computer_tool": VNCComputerUseTool,
+    "simple_vnc_computer_tool": SimpleVNCComputerUseTool,
 }
 
 # Filter out None values (missing optional dependencies)
@@ -82,14 +125,14 @@ AVAILABLE_TOOLS = {name: tool_class for name, tool_class in _ALL_TOOLS.items() i
 
 # Tool categories for organization (only include available tools)
 _ALL_CATEGORIES = {
-    "execution": ["bash", "python_executor", "safe_python_executor"],
-    "files": ["file_editor", "file_reader", "file_writer"],
-    "web": ["web_search", "duckduckgo_search", "google_search", "bing_search", "web_crawler", "simple_web_scraper"],
-    "browser": ["browser", "simple_browser"],
-    "macos": ["macos", "simple_macos"],
-    "ai": ["chat_completion", "simple_prompt"],
-    "planning": ["planning"],
-    "vnc": ["vnc_computer", "simple_vnc_computer"],
+    "execution": ["bash_tool", "python_executor_tool", "safe_python_executor_tool"],
+    "files": ["file_editor_tool", "file_reader_tool", "file_writer_tool"],
+    "web": ["web_search_tool", "duckduckgo_search_tool", "google_search_tool", "bing_search_tool", "web_crawler_tool", "simple_web_scraper_tool"],
+    "browser": ["browser_tool", "simple_browser_tool"],
+    "macos": ["macos_tool", "simple_macos_tool"],
+    "ai": ["chat_completion_tool", "simple_prompt_tool"],
+    "planning": ["planning_tool"],
+    "vnc": ["vnc_computer_tool", "simple_vnc_computer_tool"],
 }
 
 # Filter categories to only include available tools
@@ -197,49 +240,97 @@ def create_tool_suite(tool_names: list = None):
 def create_basic_toolset():
     """Create a basic set of commonly used tools"""
     return create_tool_suite([
-        "bash",
-        "python_executor", 
-        "file_editor",
-        "web_search",
-        "simple_browser"
+        "bash_tool",
+        "python_executor_tool",
+        "file_editor_tool",
+        "web_search_tool",
+        "simple_browser_tool"
     ])
 
 
 def create_web_toolset():
     """Create a toolset focused on web operations"""
     return create_tool_suite([
-        "web_search",
-        "web_crawler",
-        "browser",
-        "simple_web_scraper"
+        "web_search_tool",
+        "web_crawler_tool",
+        "browser_tool",
+        "simple_web_scraper_tool"
     ])
 
 
 def create_development_toolset():
     """Create a toolset for software development"""
     return create_tool_suite([
-        "bash",
-        "python_executor",
-        "file_editor",
-        "file_reader", 
-        "file_writer",
-        "web_search",
-        "planning"
+        "bash_tool",
+        "python_executor_tool",
+        "file_editor_tool",
+        "file_reader_tool",
+        "file_writer_tool",
+        "web_search_tool",
+        "planning_tool"
     ])
 
 
 def create_ai_toolset():
     """Create a toolset with AI capabilities"""
     return create_tool_suite([
-        "chat_completion",
-        "simple_prompt",
-        "web_search",
-        "planning",
-        "file_editor"
+        "chat_completion_tool",
+        "simple_prompt_tool",
+        "web_search_tool",
+        "planning_tool",
+        "file_editor_tool"
     ])
 
 
-# Export main classes and functions (only available ones)
+# Export all available @tool decorated functions and tool classes
+_TOOL_FUNCTIONS = [
+    # Core @tool decorated functions (always available)
+    "bash_tool",
+    "python_executor_tool",
+    "safe_python_executor_tool",
+    "file_editor_tool",
+    "file_reader_tool",
+    "file_writer_tool",
+    "planning_tool",
+]
+
+_OPTIONAL_TOOL_FUNCTIONS = [
+    # Optional @tool decorated functions
+    "web_search_tool",
+    "browser_tool",
+    "web_crawler_tool",
+    "chat_completion_tool",
+    "vnc_tool",
+    "macos_tool",
+]
+
+_TOOL_CLASSES = [
+    # Core tool classes (always available)
+    "BashTool",
+    "PythonExecutorTool",
+    "SafePythonExecutorTool",
+    "FileEditorTool",
+    "SimpleFileReaderTool",
+    "SimpleFileWriterTool",
+    "PlanningTool",
+    
+    # Optional tool classes
+    "WebSearchTool",
+    "DuckDuckGoSearchTool",
+    "GoogleSearchTool",
+    "BingSearchTool",
+    "BrowserTool",
+    "SimpleBrowserTool",
+    "WebCrawlerTool",
+    "SimpleWebScraperTool",
+    "MacOSUseTool",
+    "SimpleMacOSTool",
+    "ChatCompletionTool",
+    "SimplePromptTool",
+    "VNCComputerUseTool",
+    "SimpleVNCComputerUseTool",
+]
+
 _BASE_EXPORTS = [
     # Base classes
     "AsyncSmolTool",
@@ -262,37 +353,20 @@ _BASE_EXPORTS = [
     "TOOL_CATEGORIES",
 ]
 
-_TOOL_EXPORTS = [
-    # Core tools (always available)
-    "BashTool",
-    "PythonExecutorTool",
-    "SafePythonExecutorTool",
-    "FileEditorTool",
-    "SimpleFileReaderTool",
-    "SimpleFileWriterTool",
-    "PlanningTool",
-    
-    # Optional tools
-    "WebSearchTool",
-    "DuckDuckGoSearchTool",
-    "GoogleSearchTool",
-    "BingSearchTool",
-    "BrowserTool",
-    "SimpleBrowserTool",
-    "WebCrawlerTool",
-    "SimpleWebScraperTool",
-    "MacOSUseTool",
-    "SimpleMacOSTool",
-    "ChatCompletionTool",
-    "SimplePromptTool",
-    "VNCComputerUseTool",
-    "SimpleVNCComputerUseTool",
-]
+# Only export tool functions and classes that are actually available
+available_tool_functions = []
+for func_name in _TOOL_FUNCTIONS:
+    if globals().get(func_name) is not None:
+        available_tool_functions.append(func_name)
 
-# Only export tools that are actually available
-available_tool_exports = []
-for tool_name in _TOOL_EXPORTS:
-    if globals().get(tool_name) is not None:
-        available_tool_exports.append(tool_name)
+available_optional_tool_functions = []
+for func_name in _OPTIONAL_TOOL_FUNCTIONS:
+    if globals().get(func_name) is not None:
+        available_optional_tool_functions.append(func_name)
 
-__all__ = _BASE_EXPORTS + available_tool_exports
+available_tool_classes = []
+for class_name in _TOOL_CLASSES:
+    if globals().get(class_name) is not None:
+        available_tool_classes.append(class_name)
+
+__all__ = _BASE_EXPORTS + available_tool_functions + available_optional_tool_functions + available_tool_classes
