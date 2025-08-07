@@ -66,13 +66,14 @@ class BashSession:
         
         # Read output from the process, until the sentinel is found
         try:
-            async with asyncio.timeout(self._timeout):
+            async def read_until_sentinel():
                 while True:
                     await asyncio.sleep(self._output_delay)
                     output = self._process.stdout._buffer.decode()
                     if self._sentinel in output:
-                        output = output[:output.index(self._sentinel)]
-                        break
+                        return output[:output.index(self._sentinel)]
+            
+            output = await asyncio.wait_for(read_until_sentinel(), timeout=self._timeout)
         except asyncio.TimeoutError:
             self._timed_out = True
             raise Exception(

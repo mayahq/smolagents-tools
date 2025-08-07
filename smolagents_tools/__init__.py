@@ -5,44 +5,35 @@ This package provides a collection of tools adapted from OpenManus for use with 
 All tools follow the smolagents Tool interface and can be used in CodeAct loops.
 """
 
-from .base import AsyncSmolTool, SmolTool, SmolToolResult
+from .utils.base import AsyncSmolTool, SmolTool, SmolToolResult
 
-# Core tools (always available)
-from .bash import BashTool
-from .python_executor import PythonExecutorTool, SafePythonExecutorTool
-from .file_editor import FileEditorTool, SimpleFileReaderTool, SimpleFileWriterTool
-from .planning import PlanningTool
-
-# Optional tools (import with error handling)
-try:
-    from .web_search import WebSearchTool, DuckDuckGoSearchTool, GoogleSearchTool, BingSearchTool
-except ImportError:
-    WebSearchTool = DuckDuckGoSearchTool = GoogleSearchTool = BingSearchTool = None
-
-try:
-    from .browser import BrowserTool, SimpleBrowserTool
-except ImportError:
-    BrowserTool = SimpleBrowserTool = None
-
-try:
-    from .web_crawler import WebCrawlerTool, SimpleWebScraperTool
-except ImportError:
-    WebCrawlerTool = SimpleWebScraperTool = None
-
-try:
-    from .chat_completion import ChatCompletionTool, SimplePromptTool
-except ImportError:
-    ChatCompletionTool = SimplePromptTool = None
-
-try:
-    from .vnc import VNCComputerUseTool, SimpleVNCComputerUseTool
-except ImportError:
-    VNCComputerUseTool = SimpleVNCComputerUseTool = None
-
-try:
-    from .macos import MacOSUseTool, SimpleMacOSTool
-except ImportError:
-    MacOSUseTool = SimpleMacOSTool = None
+# Import all tools from the centralized tools module (with @tool decorators applied)
+from .tools import (
+    # Core tools (always available)
+    BashTool,
+    PythonExecutorTool,
+    SafePythonExecutorTool,
+    FileEditorTool,
+    SimpleFileReaderTool,
+    SimpleFileWriterTool,
+    PlanningTool,
+    
+    # Optional tools (may be None if dependencies not available)
+    WebSearchTool,
+    DuckDuckGoSearchTool,
+    GoogleSearchTool,
+    BingSearchTool,
+    BrowserTool,
+    SimpleBrowserTool,
+    WebCrawlerTool,
+    SimpleWebScraperTool,
+    ChatCompletionTool,
+    SimplePromptTool,
+    VNCComputerUseTool,
+    SimpleVNCComputerUseTool,
+    MacOSUseTool,
+    SimpleMacOSTool,
+)
 
 __version__ = "0.1.0"
 
