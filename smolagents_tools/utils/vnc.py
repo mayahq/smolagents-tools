@@ -9,6 +9,7 @@ import logging
 import subprocess
 from typing import Optional, Dict, Any
 from .base import AsyncSmolTool, SmolToolResult
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +144,30 @@ EXAMPLES:
                 "type": "number",
                 "description": "Timeout for the VNC operation in seconds (default: 15)",
                 "default": 15,
+                "required": False
+            },
+            "img_title": {
+                "type": "string",
+                "description": "Title attribute for the base64 image tag (used with capture_screen and capture_region)",
+                "default": "VNC Screenshot",
+                "required": False
+            },
+            "img_alt": {
+                "type": "string",
+                "description": "Alt text for the base64 image tag (used with capture_screen and capture_region)",
+                "default": "VNC screen capture",
+                "required": False
+            },
+            "display": {
+                "type": "string",
+                "description": "Whether to display the screenshot (used with capture_screen and capture_region)",
+                "default": "true",
+                "required": False
+            },
+            "include_in_next_call": {
+                "type": "string",
+                "description": "Whether to include screenshot in next agent call (used with capture_screen and capture_region)",
+                "default": "true",
                 "required": False
             }
         }
@@ -374,25 +399,64 @@ EXAMPLES:
             result.output = f"Typed text: {text}"
         return result
     
-    async def _capture_screen(self, filename: str, timeout: float = 15) -> SmolToolResult:
+    async def _capture_screen(self, filename: str, timeout: float = 15,
+                            img_title: str = "VNC Screenshot",
+                            img_alt: str = "VNC screen capture",
+                            display: str = "true",
+                            include_in_next_call: str = "true") -> SmolToolResult:
         """Capture entire screen"""
         result = await self._execute_vnc_command(["capture", filename], timeout)
         if result.success:
-            result.output = f"Screen captured and saved to {filename}"
+            try:
+                # Read the captured image and encode it to base64
+                with open(filename, 'rb') as img_file:
+                    img_data = img_file.read()
+                    base64_data = base64.b64encode(img_data).decode('utf-8')
+                
+                # Create the image tag with base64 data
+                img_tag = f'<img title="{img_title}" alt="{img_alt}" src="data:image/png;base64,{base64_data}" display="{display}" include_in_next_call="{include_in_next_call}">'
+                
+                # Return both the success message and the image tag
+                result.output = f"Screen captured and saved to {filename}\n{img_tag}"
+            except Exception as e:
+                logger.error(f"Error encoding image to base64: {str(e)}")
+                result.output = f"Screen captured and saved to {filename} (base64 encoding failed: {str(e)})"
         return result
     
-    async def _capture_region(self, x: int, y: int, width: int, height: int, filename: str, timeout: float = 15) -> SmolToolResult:
+    async def _capture_region(self, x: int, y: int, width: int, height: int, filename: str, timeout: float = 15,
+                            img_title: str = "VNC Region Screenshot",
+                            img_alt: str = None,
+                            display: str = "true",
+                            include_in_next_call: str = "true") -> SmolToolResult:
         """Capture a region of the screen"""
         # vncdotool command-line doesn't have direct region capture, so we'll use capture and note the limitation
         result = await self._execute_vnc_command(["capture", filename], timeout)
         if result.success:
-            result.output = f"Screen captured to {filename} (Note: vncdotool command-line doesn't support region capture, full screen captured instead)"
+            try:
+                # Read the captured image and encode it to base64
+                with open(filename, 'rb') as img_file:
+                    img_data = img_file.read()
+                    base64_data = base64.b64encode(img_data).decode('utf-8')
+                
+                # Use provided alt text or generate default
+                if img_alt is None:
+                    img_alt = f"VNC region capture at ({x},{y}) {width}x{height}"
+                
+                # Create the image tag with base64 data
+                img_tag = f'<img title="{img_title}" alt="{img_alt}" src="data:image/png;base64,{base64_data}" display="{display}" include_in_next_call="{include_in_next_call}">'
+                
+                # Return both the success message and the image tag
+                result.output = f"Screen captured to {filename} (Note: vncdotool command-line doesn't support region capture, full screen captured instead)\n{img_tag}"
+            except Exception as e:
+                logger.error(f"Error encoding image to base64: {str(e)}")
+                result.output = f"Screen captured to {filename} (Note: vncdotool command-line doesn't support region capture, full screen captured instead) (base64 encoding failed: {str(e)})"
         return result
     
     async def execute(self, action: str, host: str = None, port: int = 5900, password: str = None,
                      x: int = None, y: int = None, button: int = 1, key: str = None,
                      text: str = None, filename: str = None, width: int = None, height: int = None,
-                     timeout: float = 15, **kwargs) -> SmolToolResult:
+                     timeout: float = 15, img_title: str = None, img_alt: str = None,
+                     display: str = "true", include_in_next_call: str = "true", **kwargs) -> SmolToolResult:
         """
         Execute VNC automation action using reliable command-line vncdotool.
         
@@ -466,7 +530,10 @@ EXAMPLES:
                         error="filename is required for capture_screen action",
                         success=False
                     )
-                return await self._capture_screen(filename, timeout)
+                # Use provided title/alt or defaults
+                title = img_title or "VNC Screenshot"
+                alt = img_alt or "VNC screen capture"
+                return await self._capture_screen(filename, timeout, title, alt, display, include_in_next_call)
             
             elif action == "capture_region":
                 if x is None or y is None or width is None or height is None or not filename:
@@ -474,7 +541,9 @@ EXAMPLES:
                         error="x, y, width, height, and filename are required for capture_region action",
                         success=False
                     )
-                return await self._capture_region(x, y, width, height, filename, timeout)
+                # Use provided title or default
+                title = img_title or "VNC Region Screenshot"
+                return await self._capture_region(x, y, width, height, filename, timeout, title, img_alt, display, include_in_next_call)
             
             else:
                 return SmolToolResult(
