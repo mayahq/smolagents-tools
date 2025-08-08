@@ -212,10 +212,10 @@ class BrowserTool(AsyncSmolTool):
                 success=False
             )
     
-    async def execute(self, action: str, url: str = None, selector: str = None, 
-                     text: str = None, wait_time: int = 1000, 
-                     scroll_direction: str = "down", headless: bool = True, 
-                     **kwargs) -> SmolToolResult:
+    async def execute(self, action: str, url: str = None, selector: str = None,
+                     text: str = None, wait_time: int = 1000,
+                     scroll_direction: str = "down", headless: bool = True,
+                     timeout: int = 60, **kwargs) -> SmolToolResult:
         """
         Execute browser action.
         
@@ -227,6 +227,7 @@ class BrowserTool(AsyncSmolTool):
             wait_time (int): Wait time in milliseconds
             scroll_direction (str): Scroll direction
             headless (bool): Run in headless mode
+            timeout (int): Timeout in seconds for browser operations
             
         Returns:
             SmolToolResult: Result of the browser operation

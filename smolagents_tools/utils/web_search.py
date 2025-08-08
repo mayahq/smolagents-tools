@@ -114,9 +114,9 @@ class WebSearchTool(AsyncSmolTool):
         
         return output
     
-    async def execute(self, query: str, engine: str = "duckduckgo", 
-                     max_results: int = 10, region: str = "us-en", 
-                     time_range: str = None, **kwargs) -> SmolToolResult:
+    async def execute(self, query: str, engine: str = "duckduckgo",
+                     max_results: int = 10, region: str = "us-en",
+                     time_range: str = None, timeout: int = 30, **kwargs) -> SmolToolResult:
         """
         Execute web search.
         
@@ -126,6 +126,7 @@ class WebSearchTool(AsyncSmolTool):
             max_results (int): Maximum results to return
             region (str): Search region
             time_range (str): Time range filter
+            timeout (int): Timeout in seconds for search operations
             
         Returns:
             SmolToolResult: Search results

@@ -386,12 +386,12 @@ class ChatCompletionTool(AsyncSmolTool):
                 success=False
             )
     
-    async def execute(self, messages: Union[str, List[Dict[str, str]]], 
+    async def execute(self, messages: Union[str, List[Dict[str, str]]],
                      provider: str = "openai", model: str = "gpt-3.5-turbo",
                      temperature: float = 0.7, max_tokens: int = 1000,
                      system_prompt: str = None, api_key: str = None,
                      base_url: str = None, region: str = "us-east-1",
-                     stream: bool = False, **kwargs) -> SmolToolResult:
+                     stream: bool = False, timeout: int = 120, **kwargs) -> SmolToolResult:
         """
         Generate chat completion.
         
@@ -406,6 +406,7 @@ class ChatCompletionTool(AsyncSmolTool):
             base_url: Base URL for local/custom APIs
             region: AWS region for Bedrock
             stream: Enable streaming response
+            timeout: Timeout in seconds for completion requests
             
         Returns:
             SmolToolResult: Generated completion

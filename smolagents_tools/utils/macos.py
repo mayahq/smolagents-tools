@@ -473,7 +473,7 @@ class MacOSUseTool(AsyncSmolTool):
     
     async def execute(self, action: str, app_name: str = None, element_index: int = None,
                      text: str = None, submit: bool = False, click_action: str = "AXPress",
-                     scroll_direction: str = "down", script: str = None, **kwargs) -> SmolToolResult:
+                     scroll_direction: str = "down", script: str = None, timeout: int = 30, **kwargs) -> SmolToolResult:
         """
         Execute macOS automation action.
         
@@ -486,6 +486,7 @@ class MacOSUseTool(AsyncSmolTool):
             click_action (str): Type of click action
             scroll_direction (str): Scroll direction
             script (str): AppleScript code
+            timeout (int): Timeout in seconds for macOS operations
             
         Returns:
             SmolToolResult: Result of the macOS operation

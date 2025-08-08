@@ -48,13 +48,14 @@ except ImportError:
 # Create wrapper functions with @tool decorator for core tools
 
 @tool
-def bash_tool(command: str, restart: bool = False) -> str:
+def bash_tool(command: str, restart: bool = False, timeout: int = 120) -> str:
     """
     Execute bash commands in the terminal.
     
     Args:
         command: The bash command to execute. Can be empty to view additional logs when previous exit code is `-1`. Can be `ctrl+c` to interrupt the currently running process.
         restart: Whether to restart the bash session
+        timeout: Timeout in seconds for command execution (default: 120)
     
     Returns:
         Command output or error message
@@ -63,9 +64,9 @@ def bash_tool(command: str, restart: bool = False) -> str:
     import asyncio
     try:
         loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(tool_instance.execute(command=command, restart=restart))
+        result = loop.run_until_complete(tool_instance.execute(command=command, restart=restart, timeout=timeout))
     except RuntimeError:
-        result = asyncio.run(tool_instance.execute(command=command, restart=restart))
+        result = asyncio.run(tool_instance.execute(command=command, restart=restart, timeout=timeout))
     
     # Return both stdout and stderr when available
     output_parts = []
@@ -144,7 +145,7 @@ def safe_python_executor_tool(code: str, timeout: int = 30) -> str:
         return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
-def file_editor_tool(command: str, path: str, file_text: str = None, old_str: str = None, new_str: str = None, view_range: str = None) -> str:
+def file_editor_tool(command: str, path: str, file_text: str = None, old_str: str = None, new_str: str = None, view_range: str = None, timeout: int = 30) -> str:
     """
     Edit files with various operations like create, read, write, and str_replace.
     
@@ -155,6 +156,7 @@ def file_editor_tool(command: str, path: str, file_text: str = None, old_str: st
         old_str: String to be replaced (for 'str_replace' command)
         new_str: String to replace with (for 'str_replace' command)
         view_range: Range of lines to view, e.g., '[1, 50]' (for 'view' command)
+        timeout: Timeout in seconds for file operations (default: 30)
     
     Returns:
         Operation result or error message
@@ -165,12 +167,12 @@ def file_editor_tool(command: str, path: str, file_text: str = None, old_str: st
         loop = asyncio.get_event_loop()
         result = loop.run_until_complete(tool_instance.execute(
             command=command, path=path, file_text=file_text,
-            old_str=old_str, new_str=new_str, view_range=view_range
+            old_str=old_str, new_str=new_str, view_range=view_range, timeout=timeout
         ))
     except RuntimeError:
         result = asyncio.run(tool_instance.execute(
             command=command, path=path, file_text=file_text,
-            old_str=old_str, new_str=new_str, view_range=view_range
+            old_str=old_str, new_str=new_str, view_range=view_range, timeout=timeout
         ))
     
     # Return both stdout and stderr when available
@@ -186,12 +188,13 @@ def file_editor_tool(command: str, path: str, file_text: str = None, old_str: st
         return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
-def file_reader_tool(path: str) -> str:
+def file_reader_tool(path: str, timeout: int = 30) -> str:
     """
     Read the contents of a file.
     
     Args:
         path: Path to the file to read
+        timeout: Timeout in seconds for file reading (default: 30)
     
     Returns:
         File contents or error message
@@ -200,9 +203,9 @@ def file_reader_tool(path: str) -> str:
     import asyncio
     try:
         loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(tool_instance.execute(path=path))
+        result = loop.run_until_complete(tool_instance.execute(path=path, timeout=timeout))
     except RuntimeError:
-        result = asyncio.run(tool_instance.execute(path=path))
+        result = asyncio.run(tool_instance.execute(path=path, timeout=timeout))
     
     # Return both stdout and stderr when available
     output_parts = []
@@ -217,13 +220,14 @@ def file_reader_tool(path: str) -> str:
         return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
-def file_writer_tool(path: str, content: str) -> str:
+def file_writer_tool(path: str, content: str, timeout: int = 30) -> str:
     """
     Write content to a file.
     
     Args:
         path: Path to the file to write
         content: Content to write to the file
+        timeout: Timeout in seconds for file writing (default: 30)
     
     Returns:
         Success message or error message
@@ -232,9 +236,9 @@ def file_writer_tool(path: str, content: str) -> str:
     import asyncio
     try:
         loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(tool_instance.execute(path=path, content=content))
+        result = loop.run_until_complete(tool_instance.execute(path=path, content=content, timeout=timeout))
     except RuntimeError:
-        result = asyncio.run(tool_instance.execute(path=path, content=content))
+        result = asyncio.run(tool_instance.execute(path=path, content=content, timeout=timeout))
     
     # Return both stdout and stderr when available
     output_parts = []
@@ -251,7 +255,7 @@ def file_writer_tool(path: str, content: str) -> str:
 @tool
 def planning_tool(action: str, task_description: str = None, plan_id: str = None, task_id: str = None,
                   subtask_title: str = None, subtask_description: str = None, priority: str = "medium",
-                  estimated_time: str = None, dependencies: str = None, update_content: str = None) -> str:
+                  estimated_time: str = None, dependencies: str = None, update_content: str = None, timeout: int = 30) -> str:
     """
     Create and manage task plans and workflows.
     
@@ -266,6 +270,7 @@ def planning_tool(action: str, task_description: str = None, plan_id: str = None
         estimated_time: Estimated time to complete
         dependencies: Comma-separated list of task IDs this task depends on
         update_content: Content to update task with
+        timeout: Timeout in seconds for planning operations (default: 30)
     
     Returns:
         Planning operation result or error message
@@ -277,13 +282,13 @@ def planning_tool(action: str, task_description: str = None, plan_id: str = None
         result = loop.run_until_complete(tool_instance.execute(
             action=action, task_description=task_description, plan_id=plan_id, task_id=task_id,
             subtask_title=subtask_title, subtask_description=subtask_description, priority=priority,
-            estimated_time=estimated_time, dependencies=dependencies, update_content=update_content
+            estimated_time=estimated_time, dependencies=dependencies, update_content=update_content, timeout=timeout
         ))
     except RuntimeError:
         result = asyncio.run(tool_instance.execute(
             action=action, task_description=task_description, plan_id=plan_id, task_id=task_id,
             subtask_title=subtask_title, subtask_description=subtask_description, priority=priority,
-            estimated_time=estimated_time, dependencies=dependencies, update_content=update_content
+            estimated_time=estimated_time, dependencies=dependencies, update_content=update_content, timeout=timeout
         ))
     
     # Return both stdout and stderr when available
@@ -302,7 +307,7 @@ def planning_tool(action: str, task_description: str = None, plan_id: str = None
 
 if _WebSearchTool:
     @tool
-    def web_search_tool(query: str, engine: str = "duckduckgo", max_results: int = 10, region: str = "us-en", time_range: str = None) -> str:
+    def web_search_tool(query: str, engine: str = "duckduckgo", max_results: int = 10, region: str = "us-en", time_range: str = None, timeout: int = 30) -> str:
         """
         Search the web using various search engines.
         
@@ -312,6 +317,7 @@ if _WebSearchTool:
             max_results: Maximum number of results to return
             region: Region for search results (e.g., 'us-en', 'uk-en')
             time_range: Time range for results (d, w, m, y)
+            timeout: Timeout in seconds for search operations (default: 30)
         
         Returns:
             Search results or error message
@@ -322,12 +328,12 @@ if _WebSearchTool:
             loop = asyncio.get_event_loop()
             result = loop.run_until_complete(tool_instance.execute(
                 query=query, engine=engine, max_results=max_results,
-                region=region, time_range=time_range
+                region=region, time_range=time_range, timeout=timeout
             ))
         except RuntimeError:
             result = asyncio.run(tool_instance.execute(
                 query=query, engine=engine, max_results=max_results,
-                region=region, time_range=time_range
+                region=region, time_range=time_range, timeout=timeout
             ))
         
         # Return both stdout and stderr when available
@@ -345,7 +351,7 @@ if _WebSearchTool:
 if _BrowserTool:
     @tool
     def browser_tool(action: str, url: str = None, selector: str = None, text: str = None,
-                     wait_time: int = 1000, scroll_direction: str = "down", headless: bool = True) -> str:
+                     wait_time: int = 1000, scroll_direction: str = "down", headless: bool = True, timeout: int = 60) -> str:
         """
         Automate browser interactions using Playwright.
         
@@ -357,6 +363,7 @@ if _BrowserTool:
             wait_time: Time to wait in milliseconds (for 'wait' action)
             scroll_direction: Direction to scroll (up, down, left, right)
             headless: Run browser in headless mode
+            timeout: Timeout in seconds for browser operations (default: 60)
         
         Returns:
             Browser operation result or error message
@@ -367,12 +374,12 @@ if _BrowserTool:
             loop = asyncio.get_event_loop()
             result = loop.run_until_complete(tool_instance.execute(
                 action=action, url=url, selector=selector, text=text,
-                wait_time=wait_time, scroll_direction=scroll_direction, headless=headless
+                wait_time=wait_time, scroll_direction=scroll_direction, headless=headless, timeout=timeout
             ))
         except RuntimeError:
             result = asyncio.run(tool_instance.execute(
                 action=action, url=url, selector=selector, text=text,
-                wait_time=wait_time, scroll_direction=scroll_direction, headless=headless
+                wait_time=wait_time, scroll_direction=scroll_direction, headless=headless, timeout=timeout
             ))
         
         # Return both stdout and stderr when available
@@ -391,7 +398,7 @@ if _WebCrawlerTool:
     @tool
     def web_crawler_tool(url: str, extraction_strategy: str = "basic", css_selector: str = None,
                     word_count_threshold: int = 10, only_text: bool = True,
-                    include_links: bool = False, include_images: bool = False) -> str:
+                    include_links: bool = False, include_images: bool = False, timeout: int = 60) -> str:
         """
         Crawl web pages and extract structured content.
         
@@ -403,6 +410,7 @@ if _WebCrawlerTool:
             only_text: Extract only text content
             include_links: Include links in extraction
             include_images: Include images in extraction
+            timeout: Timeout in seconds for crawling operations (default: 60)
         
         Returns:
             Crawled content or error message
@@ -414,13 +422,13 @@ if _WebCrawlerTool:
             result = loop.run_until_complete(tool_instance.execute(
                 url=url, extraction_strategy=extraction_strategy, css_selector=css_selector,
                 word_count_threshold=word_count_threshold, only_text=only_text,
-                include_links=include_links, include_images=include_images
+                include_links=include_links, include_images=include_images, timeout=timeout
             ))
         except RuntimeError:
             result = asyncio.run(tool_instance.execute(
                 url=url, extraction_strategy=extraction_strategy, css_selector=css_selector,
                 word_count_threshold=word_count_threshold, only_text=only_text,
-                include_links=include_links, include_images=include_images
+                include_links=include_links, include_images=include_images, timeout=timeout
             ))
         
         # Return both stdout and stderr when available
@@ -439,7 +447,7 @@ if _ChatCompletionTool:
     @tool
     def chat_completion_tool(messages: str, provider: str = "openai", model: str = "gpt-3.5-turbo",
                        temperature: float = 0.7, max_tokens: int = 1000, system_prompt: str = None,
-                       api_key: str = None, region: str = "us-east-1") -> str:
+                       api_key: str = None, region: str = "us-east-1", timeout: int = 120) -> str:
         """
         Generate chat completions using various LLM providers.
         
@@ -452,6 +460,7 @@ if _ChatCompletionTool:
             system_prompt: System prompt to set context
             api_key: API key for the provider
             region: AWS region for Bedrock
+            timeout: Timeout in seconds for completion requests (default: 120)
         
         Returns:
             Generated completion or error message
@@ -462,12 +471,12 @@ if _ChatCompletionTool:
             loop = asyncio.get_event_loop()
             result = loop.run_until_complete(tool_instance.execute(
                 messages=messages, provider=provider, model=model, temperature=temperature,
-                max_tokens=max_tokens, system_prompt=system_prompt, api_key=api_key, region=region
+                max_tokens=max_tokens, system_prompt=system_prompt, api_key=api_key, region=region, timeout=timeout
             ))
         except RuntimeError:
             result = asyncio.run(tool_instance.execute(
                 messages=messages, provider=provider, model=model, temperature=temperature,
-                max_tokens=max_tokens, system_prompt=system_prompt, api_key=api_key, region=region
+                max_tokens=max_tokens, system_prompt=system_prompt, api_key=api_key, region=region, timeout=timeout
             ))
         
         # Return both stdout and stderr when available
@@ -501,7 +510,7 @@ if _VNCComputerUseTool:
             key: Key to press (supports combinations like 'lctrl-c')
             text: Text to type
             filename: Filename for screen capture
-            timeout: Timeout for the VNC operation in seconds
+            timeout: Timeout for the VNC operation in seconds (default: 15)
         
         Returns:
             VNC operation result or error message
@@ -536,7 +545,7 @@ if _MacOSUseTool:
     @tool
     def macos_tool(action: str, app_name: str = None, element_index: int = None, text: str = None,
                    submit: bool = False, click_action: str = "AXPress", scroll_direction: str = "down",
-                   script: str = None) -> str:
+                   script: str = None, timeout: int = 30) -> str:
         """
         Automate macOS applications and system interactions.
         
@@ -549,6 +558,7 @@ if _MacOSUseTool:
             click_action: Type of click action (AXPress, AXClick, AXOpen, AXConfirm, AXShowMenu)
             scroll_direction: Direction to scroll (up, down, left, right)
             script: AppleScript code to execute
+            timeout: Timeout in seconds for macOS operations (default: 30)
         
         Returns:
             macOS operation result or error message
@@ -559,12 +569,12 @@ if _MacOSUseTool:
             loop = asyncio.get_event_loop()
             result = loop.run_until_complete(tool_instance.execute(
                 action=action, app_name=app_name, element_index=element_index, text=text,
-                submit=submit, click_action=click_action, scroll_direction=scroll_direction, script=script
+                submit=submit, click_action=click_action, scroll_direction=scroll_direction, script=script, timeout=timeout
             ))
         except RuntimeError:
             result = asyncio.run(tool_instance.execute(
                 action=action, app_name=app_name, element_index=element_index, text=text,
-                submit=submit, click_action=click_action, scroll_direction=scroll_direction, script=script
+                submit=submit, click_action=click_action, scroll_direction=scroll_direction, script=script, timeout=timeout
             ))
         
         # Return both stdout and stderr when available

@@ -394,12 +394,12 @@ class PlanningTool(AsyncSmolTool):
                 success=False
             )
     
-    async def execute(self, action: str, task_description: str = None, 
+    async def execute(self, action: str, task_description: str = None,
                      plan_id: str = None, task_id: str = None,
                      subtask_title: str = None, subtask_description: str = None,
                      priority: str = "medium", estimated_time: str = None,
                      dependencies: str = None, update_content: str = None,
-                     **kwargs) -> SmolToolResult:
+                     timeout: int = 30, **kwargs) -> SmolToolResult:
         """
         Execute planning action.
         
@@ -414,6 +414,7 @@ class PlanningTool(AsyncSmolTool):
             estimated_time (str): Estimated completion time
             dependencies (str): Task dependencies
             update_content (str): Content for task updates
+            timeout (int): Timeout in seconds for planning operations
             
         Returns:
             SmolToolResult: Result of the planning operation

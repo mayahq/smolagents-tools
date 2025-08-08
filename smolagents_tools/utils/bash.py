@@ -11,13 +11,13 @@ from .base import AsyncSmolTool, SmolToolResult
 class BashSession:
     """A session of a bash shell, adapted from OpenManus"""
     
-    def __init__(self):
+    def __init__(self, timeout: float = 120.0):
         self._started = False
         self._process = None
         self._timed_out = False
         self.command = "/bin/bash"
         self._output_delay = 0.2  # seconds
-        self._timeout = 120.0  # seconds
+        self._timeout = timeout  # seconds
         self._sentinel = "<<exit>>"
     
     async def start(self):
@@ -76,8 +76,31 @@ class BashSession:
             output = await asyncio.wait_for(read_until_sentinel(), timeout=self._timeout)
         except asyncio.TimeoutError:
             self._timed_out = True
-            raise Exception(
-                f"timed out: bash has not returned in {self._timeout} seconds and must be restarted"
+            # Capture any output that was available before timeout
+            output = self._process.stdout._buffer.decode()
+            error = self._process.stderr._buffer.decode()
+            
+            # Clean up output
+            if output.endswith("\n"):
+                output = output[:-1]
+            if error.endswith("\n"):
+                error = error[:-1]
+            
+            # Clear the buffers
+            self._process.stdout._buffer.clear()
+            self._process.stderr._buffer.clear()
+            
+            # Return partial results with timeout error
+            timeout_msg = f"Command timed out after {self._timeout} seconds"
+            if error:
+                error = f"{timeout_msg}\nOriginal stderr: {error}"
+            else:
+                error = timeout_msg
+            
+            return SmolToolResult(
+                output=output if output else "",
+                error=error,
+                success=False
             )
         
         if output.endswith("\n"):
@@ -117,19 +140,22 @@ class BashTool(AsyncSmolTool):
         self._session: Optional[BashSession] = None
         super().__init__()
     
-    async def execute(self, command: str = None, restart: bool = False, **kwargs) -> SmolToolResult:
+    async def execute(self, command: str = None, restart: bool = False, timeout: int = 120, **kwargs) -> SmolToolResult:
         """Execute a bash command"""
         try:
             if restart:
                 if self._session:
                     self._session.stop()
-                self._session = BashSession()
+                self._session = BashSession(timeout=float(timeout))
                 await self._session.start()
                 return SmolToolResult(system="tool has been restarted.", output="Bash session restarted")
             
             if self._session is None:
-                self._session = BashSession()
+                self._session = BashSession(timeout=float(timeout))
                 await self._session.start()
+            else:
+                # Update timeout for existing session
+                self._session._timeout = float(timeout)
             
             if command is not None:
                 result = await self._session.run(command)

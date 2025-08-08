@@ -208,9 +208,9 @@ class FileEditorTool(AsyncSmolTool):
                 success=False
             )
     
-    async def execute(self, command: str, path: str, file_text: str = None, 
-                     old_str: str = None, new_str: str = None, 
-                     view_range: str = None, **kwargs) -> SmolToolResult:
+    async def execute(self, command: str, path: str, file_text: str = None,
+                     old_str: str = None, new_str: str = None,
+                     view_range: str = None, timeout: int = 30, **kwargs) -> SmolToolResult:
         """
         Execute file editing command.
         
@@ -221,6 +221,7 @@ class FileEditorTool(AsyncSmolTool):
             old_str (str): String to replace for str_replace command
             new_str (str): Replacement string for str_replace command
             view_range (str): Line range for view command
+            timeout (int): Timeout in seconds for file operations
             
         Returns:
             SmolToolResult: Result of the operation
@@ -281,7 +282,7 @@ class SimpleFileReaderTool(AsyncSmolTool):
         self.output_type = "string"
         super().__init__()
     
-    async def execute(self, path: str, **kwargs) -> SmolToolResult:
+    async def execute(self, path: str, timeout: int = 30, **kwargs) -> SmolToolResult:
         """Read file contents"""
         try:
             if not os.path.exists(path):
@@ -327,7 +328,7 @@ class SimpleFileWriterTool(AsyncSmolTool):
         self.output_type = "string"
         super().__init__()
     
-    async def execute(self, path: str, content: str, **kwargs) -> SmolToolResult:
+    async def execute(self, path: str, content: str, timeout: int = 30, **kwargs) -> SmolToolResult:
         """Write content to file"""
         try:
             # Create directory if it doesn't exist
