@@ -67,10 +67,17 @@ def bash_tool(command: str, restart: bool = False) -> str:
     except RuntimeError:
         result = asyncio.run(tool_instance.execute(command=command, restart=restart))
     
+    # Return both stdout and stderr when available
+    output_parts = []
+    if result.output:
+        output_parts.append(result.output)
+    if result.error:
+        output_parts.append(f"STDERR: {result.error}")
+    
     if result.success:
-        return result.output
+        return "\n".join(output_parts) if output_parts else "Command completed successfully"
     else:
-        return f"Error: {result.error}"
+        return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
 def python_executor_tool(code: str, timeout: int = 30) -> str:
@@ -92,10 +99,17 @@ def python_executor_tool(code: str, timeout: int = 30) -> str:
     except RuntimeError:
         result = asyncio.run(tool_instance.execute(code=code, timeout=timeout))
     
+    # Return both stdout and stderr when available
+    output_parts = []
+    if result.output:
+        output_parts.append(result.output)
+    if result.error:
+        output_parts.append(f"STDERR: {result.error}")
+    
     if result.success:
-        return result.output
+        return "\n".join(output_parts) if output_parts else "Command completed successfully"
     else:
-        return f"Error: {result.error}"
+        return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
 def safe_python_executor_tool(code: str, timeout: int = 30) -> str:
@@ -117,10 +131,17 @@ def safe_python_executor_tool(code: str, timeout: int = 30) -> str:
     except RuntimeError:
         result = asyncio.run(tool_instance.execute(code=code, timeout=timeout))
     
+    # Return both stdout and stderr when available
+    output_parts = []
+    if result.output:
+        output_parts.append(result.output)
+    if result.error:
+        output_parts.append(f"STDERR: {result.error}")
+    
     if result.success:
-        return result.output
+        return "\n".join(output_parts) if output_parts else "Command completed successfully"
     else:
-        return f"Error: {result.error}"
+        return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
 def file_editor_tool(command: str, path: str, file_text: str = None, old_str: str = None, new_str: str = None, view_range: str = None) -> str:
@@ -152,10 +173,17 @@ def file_editor_tool(command: str, path: str, file_text: str = None, old_str: st
             old_str=old_str, new_str=new_str, view_range=view_range
         ))
     
+    # Return both stdout and stderr when available
+    output_parts = []
+    if result.output:
+        output_parts.append(result.output)
+    if result.error:
+        output_parts.append(f"STDERR: {result.error}")
+    
     if result.success:
-        return result.output
+        return "\n".join(output_parts) if output_parts else "Command completed successfully"
     else:
-        return f"Error: {result.error}"
+        return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
 def file_reader_tool(path: str) -> str:
@@ -176,10 +204,17 @@ def file_reader_tool(path: str) -> str:
     except RuntimeError:
         result = asyncio.run(tool_instance.execute(path=path))
     
+    # Return both stdout and stderr when available
+    output_parts = []
+    if result.output:
+        output_parts.append(result.output)
+    if result.error:
+        output_parts.append(f"STDERR: {result.error}")
+    
     if result.success:
-        return result.output
+        return "\n".join(output_parts) if output_parts else "Command completed successfully"
     else:
-        return f"Error: {result.error}"
+        return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
 def file_writer_tool(path: str, content: str) -> str:
@@ -201,10 +236,17 @@ def file_writer_tool(path: str, content: str) -> str:
     except RuntimeError:
         result = asyncio.run(tool_instance.execute(path=path, content=content))
     
+    # Return both stdout and stderr when available
+    output_parts = []
+    if result.output:
+        output_parts.append(result.output)
+    if result.error:
+        output_parts.append(f"STDERR: {result.error}")
+    
     if result.success:
-        return result.output
+        return "\n".join(output_parts) if output_parts else "Command completed successfully"
     else:
-        return f"Error: {result.error}"
+        return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 @tool
 def planning_tool(action: str, task_description: str = None, plan_id: str = None, task_id: str = None,
@@ -244,10 +286,17 @@ def planning_tool(action: str, task_description: str = None, plan_id: str = None
             estimated_time=estimated_time, dependencies=dependencies, update_content=update_content
         ))
     
+    # Return both stdout and stderr when available
+    output_parts = []
+    if result.output:
+        output_parts.append(result.output)
+    if result.error:
+        output_parts.append(f"STDERR: {result.error}")
+    
     if result.success:
-        return result.output
+        return "\n".join(output_parts) if output_parts else "Command completed successfully"
     else:
-        return f"Error: {result.error}"
+        return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 # Optional tools with @tool decorators (only if available)
 
@@ -281,10 +330,17 @@ if _WebSearchTool:
                 region=region, time_range=time_range
             ))
         
+        # Return both stdout and stderr when available
+        output_parts = []
+        if result.output:
+            output_parts.append(result.output)
+        if result.error:
+            output_parts.append(f"STDERR: {result.error}")
+        
         if result.success:
-            return result.output
+            return "\n".join(output_parts) if output_parts else "Command completed successfully"
         else:
-            return f"Error: {result.error}"
+            return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 if _BrowserTool:
     @tool
@@ -319,10 +375,17 @@ if _BrowserTool:
                 wait_time=wait_time, scroll_direction=scroll_direction, headless=headless
             ))
         
+        # Return both stdout and stderr when available
+        output_parts = []
+        if result.output:
+            output_parts.append(result.output)
+        if result.error:
+            output_parts.append(f"STDERR: {result.error}")
+        
         if result.success:
-            return result.output
+            return "\n".join(output_parts) if output_parts else "Command completed successfully"
         else:
-            return f"Error: {result.error}"
+            return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 if _WebCrawlerTool:
     @tool
@@ -360,10 +423,17 @@ if _WebCrawlerTool:
                 include_links=include_links, include_images=include_images
             ))
         
+        # Return both stdout and stderr when available
+        output_parts = []
+        if result.output:
+            output_parts.append(result.output)
+        if result.error:
+            output_parts.append(f"STDERR: {result.error}")
+        
         if result.success:
-            return result.output
+            return "\n".join(output_parts) if output_parts else "Command completed successfully"
         else:
-            return f"Error: {result.error}"
+            return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 if _ChatCompletionTool:
     @tool
@@ -400,10 +470,17 @@ if _ChatCompletionTool:
                 max_tokens=max_tokens, system_prompt=system_prompt, api_key=api_key, region=region
             ))
         
+        # Return both stdout and stderr when available
+        output_parts = []
+        if result.output:
+            output_parts.append(result.output)
+        if result.error:
+            output_parts.append(f"STDERR: {result.error}")
+        
         if result.success:
-            return result.output
+            return "\n".join(output_parts) if output_parts else "Command completed successfully"
         else:
-            return f"Error: {result.error}"
+            return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 if _VNCComputerUseTool:
     @tool
@@ -443,10 +520,17 @@ if _VNCComputerUseTool:
                 x=x, y=y, button=button, key=key, text=text, filename=filename, timeout=timeout
             ))
         
+        # Return both stdout and stderr when available
+        output_parts = []
+        if result.output:
+            output_parts.append(result.output)
+        if result.error:
+            output_parts.append(f"STDERR: {result.error}")
+        
         if result.success:
-            return result.output
+            return "\n".join(output_parts) if output_parts else "Command completed successfully"
         else:
-            return f"Error: {result.error}"
+            return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 if _MacOSUseTool:
     @tool
@@ -483,10 +567,17 @@ if _MacOSUseTool:
                 submit=submit, click_action=click_action, scroll_direction=scroll_direction, script=script
             ))
         
+        # Return both stdout and stderr when available
+        output_parts = []
+        if result.output:
+            output_parts.append(result.output)
+        if result.error:
+            output_parts.append(f"STDERR: {result.error}")
+        
         if result.success:
-            return result.output
+            return "\n".join(output_parts) if output_parts else "Command completed successfully"
         else:
-            return f"Error: {result.error}"
+            return f"Error: {result.error}" + (f"\nSTDOUT: {result.output}" if result.output else "")
 
 # Export the original tool classes for backward compatibility (without @tool decorator)
 # These can be used directly as smolagents Tool classes
